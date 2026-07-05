@@ -1,7 +1,11 @@
 {
   "name": "@rwillians/doctests",
   "description": "The power of doctests now available to JavaScript and TypeScript.",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "author": "Rafael Willians <me@rwillians.com>",
   "license": "MIT",
   "repository": {
