@@ -1,0 +1,13 @@
+{
+  "folders": [
+    { "path": ".", "name": "doctests" },
+  ],
+  "extensions": {
+    "recommendations": [
+      "EditorConfig.EditorConfig",
+    ],
+  },
+  "settings": {
+    //
+  },
+}

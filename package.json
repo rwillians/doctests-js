@@ -1,0 +1,42 @@
+{
+  "name": "@rwillians/doctests",
+  "description": "The power of doctests now available to JavaScript and TypeScript.",
+  "version": "0.0.1",
+  "author": "Rafael Willians <me@rwillians.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rwillians/doctests-js.git"
+  },
+  "keywords": [
+    "documentation",
+    "test",
+    "doctest",
+    "doctests",
+    "bun",
+    "jest"
+  ],
+  "type": "module",
+  "module": "dist/esm/index.js",
+  "main": "dist/cjs/index.js",
+  "files": ["dist/", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "bun run build:cjs && bun run build:esm",
+    "build:cjs": "bun run --bun tsc --project tsconfig-cjs.json",
+    "build:esm": "bun run --bun tsc --project tsconfig-esm.json"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
