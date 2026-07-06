@@ -37,6 +37,7 @@ describe('parse', () => {
     it('keeps expected values as expressions', () => {
       expect(docs[0]!.examples[1]!.steps).toEqual([
         { kind: 'equal', binding: null, expression: 'fib(5)', expected: 'fib(3) + fib(4)' },
+        { kind: 'equal', binding: null, expression: 'fib(3) + fib(4)', expected: 'fib(5)' },
         { kind: 'equal', binding: null, expression: 'fib(5) === fib(3) + fib(4)', expected: 'true' },
       ]);
     });
@@ -54,11 +55,10 @@ describe('parse', () => {
       ]);
     });
 
-    it('parses `//^` lines into throws steps with optional messages', () => {
+    it('parses `//= ** (Type)` lines into throws steps with optional unquoted messages', () => {
       expect(docs[0]!.examples[4]!.steps).toEqual([
         { kind: 'throws', expression: 'fib(-1)', error: 'Error', message: null },
         { kind: 'throws', expression: 'fib(-2)', error: 'Error', message: 'position cannot be less than 0, got -2' },
-        { kind: 'throws', expression: 'fib(-3)', error: 'Error', message: 'position cannot be less than 0, got -3' },
       ]);
     });
   });
@@ -133,14 +133,25 @@ describe('parse', () => {
         /**
          * @example Broken.
          * \`\`\`
-         * one() //^ Error
+         * one() //= ** Error
+         * \`\`\`
+         */
+        export const one = () => 1;
+      `;
+
+      const legacy = `
+        /**
+         * @example Broken.
+         * \`\`\`
+         * one() //= **Error**
          * \`\`\`
          */
         export const one = () => 1;
       `;
 
       expect(() => parse(missing)).toThrow('expected a value after `//=`');
-      expect(() => parse(throws)).toThrow('expected `//^ **ErrorType** "optional message"`');
+      expect(() => parse(throws)).toThrow('expected `//= ** (ErrorType) optional message`');
+      expect(() => parse(legacy)).toThrow('expected `//= ** (ErrorType) optional message`');
     });
   });
 });

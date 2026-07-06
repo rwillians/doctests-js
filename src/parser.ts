@@ -27,7 +27,7 @@ const TAG = /^@(\w+)\s*/;
 const FENCE = /^```/;
 const DECLARATION = /^(export\s+)?(?:default\s+)?(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:const|let|var|function\*?|class|enum)\s+([A-Za-z_$][\w$]*)/;
 const BINDING = /^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/;
-const THROWS = /^\*\*([^*]+)\*\*\s*(?:"([^"]*)"|'([^']*)')?$/;
+const THROWS = /^\*\*\s*\(([^)]+)\)\s*(.*)$/;
 
 const cleanLine = (line: string): string => line.replace(STAR_PREFIX, '').trimEnd();
 
@@ -83,25 +83,28 @@ const splitExamples = (lines: string[]): string[][] => {
 };
 
 const classify = (line: string): Step => {
-  const markers = [line.indexOf('//='), line.indexOf('//^')].filter((at) => at >= 0);
-  const at = markers.length > 0 ? Math.min(...markers) : -1;
+  const at = line.indexOf('//=');
 
   if (at < 0) return { kind: 'exec', code: line };
 
   const expression = line.slice(0, at).trim().replace(/;$/, '');
   const rest = line.slice(at + 3).trim();
 
-  if (line.startsWith('//=', at)) {
-    if (rest === '') throw new Error(`malformed doctest assertion, expected a value after \`//=\`: ${line}`);
+  if (rest === '') throw new Error(`malformed doctest assertion, expected a value after \`//=\`: ${line}`);
 
-    const binding = BINDING.exec(expression);
-    return { kind: 'equal', binding: binding?.[1] ?? null, expression, expected: rest };
+  // No expression can start with `**` (exponentiation is infix), so a
+  // `** (ErrorType)` right-hand side unambiguously marks a throws
+  // assertion. The optional message is raw text up to the end of the
+  // line, ExUnit-style — no quoting.
+  if (rest.startsWith('**')) {
+    const throws = THROWS.exec(rest);
+    if (!throws) throw new Error(`malformed doctest assertion, expected \`//= ** (ErrorType) optional message\`: ${line}`);
+
+    return { kind: 'throws', expression, error: throws[1]!.trim(), message: throws[2]!.trim() || null };
   }
 
-  const throws = THROWS.exec(rest);
-  if (!throws) throw new Error(`malformed doctest assertion, expected \`//^ **ErrorType** "optional message"\`: ${line}`);
-
-  return { kind: 'throws', expression, error: throws[1]!.trim(), message: throws[2] ?? throws[3] ?? null };
+  const binding = BINDING.exec(expression);
+  return { kind: 'equal', binding: binding?.[1] ?? null, expression, expected: rest };
 };
 
 /**

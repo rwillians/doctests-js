@@ -38,9 +38,8 @@
  * @example The given position cannot be less than zero.
  *
  * ```js
- * fib(-1) //^ **Error**
- * fib(-2) //^ **Error** "position cannot be less than 0, got -2"
- * fib(-3) //^ **Error** 'position cannot be less than 0, got -3'
+ * fib(-1) //= ** (Error)
+ * fib(-2) //= ** (Error) position cannot be less than 0, got -2
  * ```
  */
 export const fib = (position: number): number => {
