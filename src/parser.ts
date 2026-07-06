@@ -12,7 +12,7 @@ export type Step =
 
 export type Example = {
   description: string;
-  steps: Step[];
+  blocks: Step[][];
 };
 
 export type Doc = {
@@ -110,25 +110,33 @@ const classify = (line: string): Step => {
 /**
  * Parses one `@example` section. The description is the text from the
  * tag up to the first blank line or code fence; prose paragraphs after
- * that are ignored; every fenced code block contributes steps.
+ * that are ignored. Each fenced code block becomes its own group of
+ * steps — the runner registers one test per block.
  */
 const parseExample = (lines: string[]): Example => {
   const description: string[] = [];
-  const steps: Step[] = [];
-  let fenced = false;
+  const blocks: Step[][] = [];
+  let block: Step[] | null = null;
   let describing = true;
 
   for (const line of lines) {
     const trimmed = line.trim();
 
     if (FENCE.test(trimmed)) {
-      fenced = !fenced;
       describing = false;
+
+      if (block === null) {
+        block = [];
+      } else {
+        if (block.length > 0) blocks.push(block);
+        block = null;
+      }
+
       continue;
     }
 
-    if (fenced) {
-      if (trimmed !== '') steps.push(classify(trimmed));
+    if (block !== null) {
+      if (trimmed !== '') block.push(classify(trimmed));
       continue;
     }
 
@@ -140,7 +148,7 @@ const parseExample = (lines: string[]): Example => {
     if (describing) description.push(trimmed);
   }
 
-  return { description: description.join(' ').replace(/\s+/g, ' ').trim(), steps };
+  return { description: description.join(' ').replace(/\s+/g, ' ').trim(), blocks };
 };
 
 export const parse = (source: string): Doc[] => {
@@ -151,7 +159,7 @@ export const parse = (source: string): Doc[] => {
     if (!declaration) continue;
 
     const lines = match[1]!.split('\n').map(cleanLine);
-    const examples = splitExamples(lines).map(parseExample).filter((example) => example.steps.length > 0);
+    const examples = splitExamples(lines).map(parseExample).filter((example) => example.blocks.length > 0);
     if (examples.length === 0) continue;
 
     docs.push({ ...declaration, examples });

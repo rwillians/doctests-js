@@ -1,11 +1,12 @@
 /**
- * Compiles a parsed example into the body of an async function. The
- * runner provides `expect` (from the test framework) and `__errorName`
- * (error-name matcher) as parameters, and destructures the target
- * module's exports above this body — so steps can call them directly.
+ * Compiles one code block of a parsed example into the body of an
+ * async function. The runner provides `expect` (from the test
+ * framework) and `__errorName` (error-name matcher) as parameters, and
+ * destructures the target module's exports above this body — so steps
+ * can call them directly.
  */
 
-import type { Example, Step } from './parser';
+import type { Step } from './parser';
 
 const compileStep = (step: Step): string => {
   switch (step.kind) {
@@ -38,4 +39,4 @@ const compileStep = (step: Step): string => {
   }
 };
 
-export const compile = (example: Example): string => example.steps.map(compileStep).join('\n');
+export const compile = (steps: Step[]): string => steps.map(compileStep).join('\n');

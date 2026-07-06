@@ -24,42 +24,59 @@ describe('parse', () => {
         'The first and second numbers of the sequence are equal to one.',
         'The given position cannot be less than zero.',
         "Assertions are optional, as long as the example doesn't throw an error the test will pass.",
+        'There can be more than one code block in an example.',
+      ]);
+    });
+
+    it('keeps each code block of an example as its own step group, ignoring prose in between', () => {
+      expect(docs[0]!.examples[6]!.blocks).toEqual([
+        [{ kind: 'equal', binding: null, expression: 'fib(1)', expected: '1' }],
+        [{ kind: 'equal', binding: null, expression: 'fib(2)', expected: '1' }],
+        [{ kind: 'equal', binding: null, expression: 'fib(3)', expected: '2' }],
       ]);
     });
 
     it('parses `//=` lines into equal steps with raw expressions', () => {
-      expect(docs[0]!.examples[0]!.steps).toEqual([
-        { kind: 'equal', binding: null, expression: 'fib(3)', expected: '2' },
-        { kind: 'equal', binding: null, expression: 'fib(4)', expected: '3' },
-        { kind: 'equal', binding: null, expression: 'fib(5)', expected: '5' },
+      expect(docs[0]!.examples[0]!.blocks).toEqual([
+        [
+          { kind: 'equal', binding: null, expression: 'fib(3)', expected: '2' },
+          { kind: 'equal', binding: null, expression: 'fib(4)', expected: '3' },
+          { kind: 'equal', binding: null, expression: 'fib(5)', expected: '5' },
+        ],
       ]);
     });
 
     it('keeps expected values as expressions', () => {
-      expect(docs[0]!.examples[1]!.steps).toEqual([
-        { kind: 'equal', binding: null, expression: 'fib(5)', expected: 'fib(3) + fib(4)' },
-        { kind: 'equal', binding: null, expression: 'fib(3) + fib(4)', expected: 'fib(5)' },
-        { kind: 'equal', binding: null, expression: 'fib(5) === fib(3) + fib(4)', expected: 'true' },
+      expect(docs[0]!.examples[1]!.blocks).toEqual([
+        [
+          { kind: 'equal', binding: null, expression: 'fib(5)', expected: 'fib(3) + fib(4)' },
+          { kind: 'equal', binding: null, expression: 'fib(3) + fib(4)', expected: 'fib(5)' },
+          { kind: 'equal', binding: null, expression: 'fib(5) === fib(3) + fib(4)', expected: 'true' },
+        ],
       ]);
     });
 
     it('ignores prose around code blocks and strips trailing semicolons', () => {
-      expect(docs[0]!.examples[2]!.steps).toEqual([
-        { kind: 'equal', binding: null, expression: 'fib(0)', expected: '0' },
+      expect(docs[0]!.examples[2]!.blocks).toEqual([
+        [{ kind: 'equal', binding: null, expression: 'fib(0)', expected: '0' }],
       ]);
     });
 
     it('captures const bindings on assertion lines', () => {
-      expect(docs[0]!.examples[3]!.steps).toEqual([
-        { kind: 'equal', binding: 'a', expression: 'const a = fib(1)', expected: '1' },
-        { kind: 'equal', binding: 'b', expression: 'const b = fib(2)', expected: '1' },
+      expect(docs[0]!.examples[3]!.blocks).toEqual([
+        [
+          { kind: 'equal', binding: 'a', expression: 'const a = fib(1)', expected: '1' },
+          { kind: 'equal', binding: 'b', expression: 'const b = fib(2)', expected: '1' },
+        ],
       ]);
     });
 
     it('parses `//= ** (Type)` lines into throws steps with optional unquoted messages', () => {
-      expect(docs[0]!.examples[4]!.steps).toEqual([
-        { kind: 'throws', expression: 'fib(-1)', error: 'Error', message: null },
-        { kind: 'throws', expression: 'fib(-2)', error: 'Error', message: 'position cannot be less than 0, got -2' },
+      expect(docs[0]!.examples[4]!.blocks).toEqual([
+        [
+          { kind: 'throws', expression: 'fib(-1)', error: 'Error', message: null },
+          { kind: 'throws', expression: 'fib(-2)', error: 'Error', message: 'position cannot be less than 0, got -2' },
+        ],
       ]);
     });
   });
@@ -77,9 +94,11 @@ describe('parse', () => {
         export const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0);
       `;
 
-      expect(parse(source)[0]!.examples[0]!.steps).toEqual([
-        { kind: 'exec', code: 'const numbers = [1, 2, 3]' },
-        { kind: 'equal', binding: null, expression: 'sum(numbers)', expected: '6' },
+      expect(parse(source)[0]!.examples[0]!.blocks).toEqual([
+        [
+          { kind: 'exec', code: 'const numbers = [1, 2, 3]' },
+          { kind: 'equal', binding: null, expression: 'sum(numbers)', expected: '6' },
+        ],
       ]);
     });
 
@@ -98,8 +117,8 @@ describe('parse', () => {
         export const one = () => 1;
       `;
 
-      expect(parse(source)[0]!.examples[0]!.steps).toEqual([
-        { kind: 'equal', binding: null, expression: 'one()', expected: '1' },
+      expect(parse(source)[0]!.examples[0]!.blocks).toEqual([
+        [{ kind: 'equal', binding: null, expression: 'one()', expected: '1' }],
       ]);
     });
 

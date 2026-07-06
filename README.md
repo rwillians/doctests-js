@@ -126,9 +126,7 @@ satisfy `** (Error)`.
 ### Descriptions and prose
 
 The test name is the text from `@example` up to the first blank line or
-code block. Everything else is prose for your readers — it's ignored,
-and every fenced block in the same `@example` contributes steps to the
-same test:
+code block. Everything else is prose for your readers — it's ignored:
 
 ````ts
 /**
@@ -142,6 +140,18 @@ same test:
  * ```
  */
 ````
+
+An `@example` can interleave as many code blocks and prose paragraphs
+as it needs. Each code block becomes its own test case — when there's
+more than one, the test names are numbered:
+
+```
+✓ src/fib.ts > fib > The position is zero-based (1)
+✓ src/fib.ts > fib > The position is zero-based (2)
+```
+
+Blocks are independent tests, so variables declared in one block are
+not visible in the next — multi-step setups belong in a single block.
 
 ## Good to know
 

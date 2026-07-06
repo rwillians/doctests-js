@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'bun:test';
 
 import { compile } from './compiler';
-import { parse, type Example } from './parser';
+import { parse, type Step } from './parser';
 
 type Exports = Record<string, unknown>;
 type ErrorName = (error: unknown, expected: string) => string;
@@ -40,10 +40,10 @@ const transpile = (code: string): string => {
   return transpiler.transformSync(code);
 };
 
-const run = async (exports: Exports, example: Example): Promise<void> => {
+const run = async (exports: Exports, steps: Step[]): Promise<void> => {
   const names = Object.keys(exports).filter((name) => IDENTIFIER.test(name));
   const header = names.length > 0 ? `const { ${names.join(', ')} } = __exports__;` : '';
-  const body = transpile(compile(example));
+  const body = transpile(compile(steps));
   const compiled = new AsyncFunction('__exports__', 'expect', '__errorName', `"use strict";\n${header}\n${body}`);
 
   await compiled(exports, expect, errorName);
@@ -60,10 +60,16 @@ const register = (root: string, path: string): void => {
     for (const doc of docs) {
       describe(doc.subject, () => {
         for (const example of doc.examples) {
-          it(title(example.description), async () => {
-            const exports = (await import(resolve(root, path))) as Exports;
-            await run(exports, example);
-          });
+          const name = title(example.description);
+
+          for (const [index, block] of example.blocks.entries()) {
+            const label = example.blocks.length === 1 ? name : `${name} (${index + 1})`;
+
+            it(label, async () => {
+              const exports = (await import(resolve(root, path))) as Exports;
+              await run(exports, block);
+            });
+          }
         }
       });
     }

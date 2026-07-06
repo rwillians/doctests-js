@@ -17,9 +17,9 @@ Data flows `parser → compiler → index`, one file each in `src/`:
 - `src/parser.ts` — pure, dependency-free text scanner (no TypeScript
   compiler API, works identically for `.js`/`.ts`). `parse(source)` →
   `Doc[]` of `{ subject, exported, examples }`, where each example has a
-  description and a list of steps.
-- `src/compiler.ts` — `compile(example)` → the body of an async function
-  made of `expect()` assertions.
+  description and one or more code blocks (each a list of steps).
+- `src/compiler.ts` — `compile(steps)` → the body of an async function
+  made of `expect()` assertions, one block at a time.
 - `src/index.ts` — `doctest({ include, exclude })` globs files
   (`Bun.Glob`, relative to cwd), and registers
   `describe(file) > describe(symbol) > it(example description)`.
@@ -52,6 +52,9 @@ Rules the implementation relies on:
 - The example description is the text from `@example` up to the first
   blank line or code fence; prose paragraphs around fences are ignored;
   the trailing period is trimmed from the `it` name.
+- Each code block in an `@example` registers its own `it`. With more
+  than one block the names get a 1-based suffix — `description (2)` —
+  and blocks do NOT share scope with each other.
 - Only `export`ed symbols run; the subject is the first declaration
   after the JSDoc block. Malformed markers throw at parse time — never
   fall back to silently executing a bad assertion line.
