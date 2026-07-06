@@ -9,11 +9,15 @@ describe('parse', () => {
   describe('test/fixtures/utils.ts', () => {
     const docs = parse(fixture);
 
-    it('finds both documented symbols and their export status', () => {
+    it('finds documented symbols with their export status', () => {
       expect(docs.map(({ subject, exported }) => ({ subject, exported }))).toEqual([
         { subject: 'fib', exported: true },
         { subject: 'foo', exported: false },
       ]);
+    });
+
+    it('collects only @doctest-marked examples', () => {
+      expect(docs[1]!.examples).toHaveLength(1);
     });
 
     it('keeps examples in source order with collapsed descriptions', () => {
@@ -85,6 +89,7 @@ describe('parse', () => {
     it('treats plain code lines as exec steps', () => {
       const source = `
         /**
+         * @doctest
          * @example Adds up.
          * \`\`\`
          * const numbers = [1, 2, 3]
@@ -105,6 +110,7 @@ describe('parse', () => {
     it('ends an example section at the next jsdoc tag', () => {
       const source = `
         /**
+         * @doctest
          * @example One.
          * \`\`\`
          * one() //= 1
@@ -128,6 +134,7 @@ describe('parse', () => {
         export const a = 1;
 
         /**
+         * @doctest
          * @example Dangling.
          * \`\`\`
          * a //= 1
@@ -138,9 +145,47 @@ describe('parse', () => {
       expect(parse(source)).toEqual([]);
     });
 
+    it('treats @example without a preceding @doctest as plain documentation', () => {
+      const source = `
+        /**
+         * @example Not a test — never parsed, even with bogus markers.
+         * \`\`\`
+         * one() //= ** broken beyond repair
+         * one() //=
+         * \`\`\`
+         */
+        export const one = () => 1;
+      `;
+
+      expect(parse(source)).toEqual([]);
+    });
+
+    it('only marks the @example immediately following a @doctest tag', () => {
+      const source = `
+        /**
+         * @doctest
+         * @param nothing - a tag in between disarms the @doctest
+         * @example Not a test.
+         * \`\`\`
+         * one() //= 2
+         * \`\`\`
+         *
+         * @doctest
+         * @example A test.
+         * \`\`\`
+         * one() //= 1
+         * \`\`\`
+         */
+        export const one = () => 1;
+      `;
+
+      expect(parse(source)[0]!.examples.map((example) => example.description)).toEqual(['A test.']);
+    });
+
     it('rejects malformed assertion markers', () => {
       const missing = `
         /**
+         * @doctest
          * @example Broken.
          * \`\`\`
          * one() //=
@@ -151,6 +196,7 @@ describe('parse', () => {
 
       const throws = `
         /**
+         * @doctest
          * @example Broken.
          * \`\`\`
          * one() //= ** Error
@@ -161,6 +207,7 @@ describe('parse', () => {
 
       const legacy = `
         /**
+         * @doctest
          * @example Broken.
          * \`\`\`
          * one() //= **Error**

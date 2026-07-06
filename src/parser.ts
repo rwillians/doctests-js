@@ -53,10 +53,15 @@ const declarationAfter = (source: string, index: number): { subject: string; exp
  * Splits a cleaned JSDoc body into `@example` sections. A section runs
  * from its `@example` line to the next `@tag` (or the end of the
  * block). Tag-looking lines inside code fences are left alone.
+ *
+ * Doctests are opt-in: only `@example` tags preceded by a `@doctest`
+ * tag are collected — any other `@example` is plain documentation and
+ * is never parsed for steps.
  */
 const splitExamples = (lines: string[]): string[][] => {
   const sections: string[][] = [];
   let current: string[] | null = null;
+  let armed = false;
   let fenced = false;
 
   for (const line of lines) {
@@ -71,8 +76,9 @@ const splitExamples = (lines: string[]): string[][] => {
     const tag = fenced ? null : TAG.exec(trimmed);
 
     if (tag) {
-      current = tag[1] === 'example' ? [trimmed.replace(TAG, '')] : null;
+      current = tag[1] === 'example' && armed ? [trimmed.replace(TAG, '')] : null;
       if (current) sections.push(current);
+      armed = tag[1] === 'doctest';
       continue;
     }
 

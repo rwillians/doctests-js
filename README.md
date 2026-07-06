@@ -19,7 +19,8 @@ bun add -d @rwillians/doctests
 ```
 
 Write examples in your JSDoc using `@example` tags with fenced code
-blocks. The `//=` marker asserts what an expression evaluates to:
+blocks, and mark the ones you want tested with a `@doctest` tag. The
+`//=` marker asserts what an expression evaluates to:
 
 ````ts
 // src/fib.ts
@@ -27,20 +28,37 @@ blocks. The `//=` marker asserts what an expression evaluates to:
 /**
  * Returns the number at a given position of the fibonacci sequence.
  *
+ * @doctest
  * @example The position is zero-based.
  * ```
  * fib(0) //= 0
  * ```
  *
+ * @doctest
  * @example The first and second numbers of the sequence are equal to one.
  * ```
  * fib(1) //= 1
  * fib(2) //= 1
  * ```
  *
+ * @doctest
  * @example Every other number is the sum of the two preceding ones.
  * ```
  * fib(5) //= fib(3) + fib(4)
+ * ```
+ *
+ * @doctest
+ * @example The given position cannot be less than zero.
+ *
+ * ```js
+ * fib(-1) //= ** (Error)
+ * fib(-2) //= ** (Error) position cannot be less than 0, got -2
+ * ```
+ *
+ * @example Only examples preceded by a `@doctest` tag are run as
+ *          tests.
+ * ```
+ * throw new Error('this should not run');
  * ```
  */
 export const fib = (position: number): number => {
@@ -49,6 +67,15 @@ export const fib = (position: number): number => {
 
   return fib(position - 2) + fib(position - 1);
 };
+
+/**
+ * @doctest
+ * @example Examples on private functions get ignored.
+ * ```
+ * throw new Error('this should not run');
+ * ```
+ */
+const foo = () => 'bar';
 ````
 
 Then register your doctests from a regular spec file:
@@ -90,6 +117,7 @@ evaluated in the same scope:
 
 ```
 fib(5)                     //= fib(3) + fib(4)
+fib(3) + fib(4)            //= fib(5)
 fib(5) === fib(3) + fib(4) //= true
 ```
 
@@ -130,6 +158,7 @@ code block. Everything else is prose for your readers — it's ignored:
 
 ````ts
 /**
+ * @doctest
  * @example The position is zero-based.
  *
  * Zero-based indexing means the first element of the sequence
@@ -157,6 +186,10 @@ not visible in the next — multi-step setups belong in a single block.
 
 - **Runs on Bun.** Doctests register through `bun:test` — run them with
   `bun test`.
+- **Doctests are opt-in.** Only `@example` tags directly preceded by a
+  `@doctest` tag become tests. Any other `@example` is plain
+  documentation — it's never parsed, so it's free to contain
+  pseudo-code.
 - **Only exported symbols run.** Doctests on private functions are
   skipped — they can't be exercised from the outside, and examples
   should show your public API anyway.

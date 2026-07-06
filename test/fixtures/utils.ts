@@ -1,4 +1,5 @@
 /**
+ * @doctest
  * @example Returns a number of the fibonacci sequence by its given
  *          position.
  * ```
@@ -7,6 +8,7 @@
  * fib(5) //= 5
  * ```
  *
+ * @doctest
  * @example The value of a position in the fibonacci sequence is equal
  *          to the sum of the two preceding numbers.
  * ```
@@ -15,6 +17,7 @@
  * fib(5) === fib(3) + fib(4) //= true
  * ```
  *
+ * @doctest
  * @example The position is zero-based.
  *
  * Zero-based indexing means that the first element of a sequence is
@@ -28,6 +31,7 @@
  * As you can see, the first number of the fibonacci sequence is 0,
  * which is at position 0.
  *
+ * @doctest
  * @example The first and second numbers of the sequence are equal to
  *          one.
  * ```ts
@@ -35,6 +39,7 @@
  * const b = fib(2) //= 1
  * ```
  *
+ * @doctest
  * @example The given position cannot be less than zero.
  *
  * ```js
@@ -42,12 +47,14 @@
  * fib(-2) //= ** (Error) position cannot be less than 0, got -2
  * ```
  *
+ * @doctest
  * @example Assertions are optional, as long as the example doesn't
  *          throw an error the test will pass.
  * ```
  * fib(1)
  * ```
  *
+ * @doctest
  * @example There can be more than one code block in an example.
  *
  * Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -80,6 +87,12 @@
  * Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit
  * aut fugit, sed quia consequuntur magni dolores eos qui ratione
  * voluptatem sequi nesciunt.
+ *
+ * @example Only examples preceded by a `@doctest` tag are run as
+ *          tests.
+ * ```
+ * throw new Error('this should not run');
+ * ```
  */
 export const fib = (position: number): number => {
   if (position < 0) throw new Error(`position cannot be less than 0, got ${position}`);
@@ -89,9 +102,10 @@ export const fib = (position: number): number => {
 };
 
 /**
+ * @doctest
  * @example Notice that doctests on private functions get ignored.
  * ```
- * foo() //= 'bar'
+ * throw new Error('this should not run');
  * ```
  */
 const foo = () => 'bar';

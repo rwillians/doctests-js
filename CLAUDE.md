@@ -42,6 +42,10 @@ new Map()                             no marker: plain exec step, runs in order
 
 Rules the implementation relies on:
 
+- Doctests are opt-in: only `@example` tags directly preceded by a
+  `@doctest` tag are collected (any other jsdoc tag in between disarms
+  it). Unmarked `@example`s are documentation — never parsed, so they
+  are exempt from malformed-marker errors.
 - A right-hand side starting with `**` is unambiguously a throws
   assertion — no JS expression can start with `**` (exponentiation is
   infix). Do not introduce syntax that breaks this invariant.
