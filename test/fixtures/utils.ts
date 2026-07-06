@@ -11,6 +11,7 @@
  *          to the sum of the two preceding numbers.
  * ```
  * fib(5)                     //= fib(3) + fib(4)
+ * fib(3) + fib(4)            //= fib(5)
  * fib(5) === fib(3) + fib(4) //= true
  * ```
  *
@@ -43,10 +44,8 @@
  * ```
  */
 export const fib = (position: number): number => {
-  if (position   < 0) throw new Error(`position cannot be less than 0, got ${position}`);
-  if (position === 0) return 0;
-  if (position === 1) return 1;
-  if (position === 2) return 1;
+  if (position < 0) throw new Error(`position cannot be less than 0, got ${position}`);
+  if (position < 2) return position;
 
   return fib(position - 2) + fib(position - 1);
 };
