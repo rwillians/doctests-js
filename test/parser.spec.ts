@@ -23,6 +23,7 @@ describe('parse', () => {
         'The position is zero-based.',
         'The first and second numbers of the sequence are equal to one.',
         'The given position cannot be less than zero.',
+        "Assertions are optional, as long as the example doesn't throw an error the test will pass.",
       ]);
     });
 

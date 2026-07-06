@@ -41,6 +41,12 @@
  * fib(-1) //= ** (Error)
  * fib(-2) //= ** (Error) position cannot be less than 0, got -2
  * ```
+ *
+ * @example Assertions are optional, as long as the example doesn't
+ *          throw an error the test will pass.
+ * ```
+ * fib(1)
+ * ```
  */
 export const fib = (position: number): number => {
   if (position < 0) throw new Error(`position cannot be less than 0, got ${position}`);
@@ -50,9 +56,7 @@ export const fib = (position: number): number => {
 };
 
 /**
- * Notice that doctests on private functions get ignored.
- *
- * @example Returns bar.
+ * @example Notice that doctests on private functions get ignored.
  * ```
  * foo() //= 'bar'
  * ```
