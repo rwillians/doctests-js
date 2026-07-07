@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 
 import { parse } from '../src/parser';
 
-const fixture = readFileSync('test/fixtures/utils.ts', 'utf8');
+const fixture = readFileSync('examples/utils.ts', 'utf8');
 
 describe('parse', () => {
-  describe('test/fixtures/utils.ts', () => {
+  describe('examples/utils.ts', () => {
     const docs = parse(fixture);
 
     it('finds documented symbols with their export status', () => {

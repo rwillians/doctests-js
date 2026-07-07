@@ -1,6 +1,6 @@
 import { doctest } from '../src';
 
 doctest({
-  include: ['test/fixtures/*.ts'],
-  exclude: [],
+  include: ['examples/**/*.ts'],
+  exclude: ['examples/**/*.d.ts', 'examples/**/*.{spec,test}.ts'],
 });
